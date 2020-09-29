@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -20,6 +21,8 @@ namespace ConsoleApp1
         static TelegramBotClient client;
         static List<string> kurss = new List<string>();
         static List<string> sale = new List<string>();
+        const string connectionString = "Server=tcp:met.database.windows.net,1433;Initial Catalog=AzureMet_DB;Persist Security Info=False;User ID=pricol;Password=Ujk213l0Il;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+
         static void Main(string[] args)
         {
 
@@ -27,7 +30,17 @@ namespace ConsoleApp1
             client.OnMessage += getMsg;
             client.StartReceiving();
             Console.Read();
+           
+        }
+        private static void CreateCommand(string queryString, string connectionString)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
 
+                SqlCommand command = new SqlCommand(queryString, connection);
+                command.Connection.Open();
+                command.ExecuteNonQuery();
+            }
         }
         private static void getBuy()
         {
@@ -64,23 +77,20 @@ namespace ConsoleApp1
                 case "/start":
                     var markup = new ReplyKeyboardMarkup(new[]
                     {
-                        new KeyboardButton(""),
-                        new KeyboardButton("Konkretniy kurs valuti"),
+                        new KeyboardButton("весь курс"),
+                        new KeyboardButton("настройки"),
                     });
                     markup.OneTimeKeyboard = true;
                     client.SendTextMessageAsync(e.Message.Chat.Id, "Choose lang", replyMarkup: markup);
                     break;
-                case "ves` kurs":
+                case "весь курс":
                     getBuy();
                     client.SendTextMessageAsync(e.Message.Chat.Id, "Buy USD : " + kurss[0] + " Sale USD : " + sale[0]);
                     client.SendTextMessageAsync(e.Message.Chat.Id, "Buy EUR : " + kurss[1] + " Sale EUR : " + sale[1]);
                     client.SendTextMessageAsync(e.Message.Chat.Id, "Buy RUB : " + kurss[2] + " Sale RUB : " + sale[2]);
                     break;
-                case "ves` kurss":
-                    getBuy();
-                    client.SendTextMessageAsync(e.Message.Chat.Id, "Buy USD : " + kurss[0] + " Sale USD : " + sale[0]);
-                    client.SendTextMessageAsync(e.Message.Chat.Id, "Buy EUR : " + kurss[1] + " Sale EUR : " + sale[1]);
-                    client.SendTextMessageAsync(e.Message.Chat.Id, "Buy RUB : " + kurss[2] + " Sale RUB : " + sale[2]);
+                case "настройки":
+                    CreateCommand("SELECT * FROM ParentTable",connectionString);
                     break;
 
                 default:
