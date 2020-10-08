@@ -1,15 +1,11 @@
-﻿using Nancy.Json;
-using Newtonsoft.Json;
+﻿using MySqlConnector;
+using Nancy.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -21,8 +17,9 @@ namespace ConsoleApp1
         static TelegramBotClient client;
         static List<string> kurss = new List<string>();
         static List<string> sale = new List<string>();
-        const string connectionString = "Server=tcp:met.database.windows.net,1433;Initial Catalog=AzureMet_DB;Persist Security Info=False;User ID=pricol;Password=Ujk213l0Il;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-
+        static string Rub;
+        const string connectionString = "Server=tcp:met.database.windows.net,1433;Initial Catalog=AzureMet_DB;Persist Security Info=False;User ID=pricol;Password=Ujk213l0Il;";
+       
         static void Main(string[] args)
         {
 
@@ -32,15 +29,27 @@ namespace ConsoleApp1
             Console.Read();
            
         }
-        private static void CreateCommand(string queryString, string connectionString)
+        private static void CreateCommand()
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            SqlConnection conn = new SqlConnection(connectionString);
+            // устанавливаем соединение с БД
+            conn.Open();
+            // запрос
+            string sql = "SELECT name FROM Menu WHERE parent_id = 2 AND ID =4";
+            // объект для выполнения SQL-запроса
+            SqlCommand command = new SqlCommand(sql, conn);
+            // объект для чтения ответа сервера
+            SqlDataReader reader = command.ExecuteReader();
+            // читаем результат
+            while (reader.Read())
             {
-
-                SqlCommand command = new SqlCommand(queryString, connection);
-                command.Connection.Open();
-                command.ExecuteNonQuery();
+                // элементы массива [] - это значения столбцов из запроса SELECT
+                Console.WriteLine(reader[0].ToString());
+                Rub = reader[0].ToString();
             }
+            reader.Close(); // закрываем reader
+            // закрываем соединение с БД
+            conn.Close();
         }
         private static void getBuy()
         {
@@ -63,7 +72,8 @@ namespace ConsoleApp1
                     sale.Add(item["sale"].ToString());
                 }
 
-
+                objText.ToString();
+                //Console.WriteLine(objText);
             }
         }
         private static void getMsg(object sender, MessageEventArgs e)
@@ -81,7 +91,7 @@ namespace ConsoleApp1
                         new KeyboardButton("настройки"),
                     });
                     markup.OneTimeKeyboard = true;
-                    client.SendTextMessageAsync(e.Message.Chat.Id, "Choose lang", replyMarkup: markup);
+                    //client.SendTextMessageAsync(e.Message.Chat.Id, "Choose lang", replyMarkup: markup);
                     break;
                 case "весь курс":
                     getBuy();
@@ -90,7 +100,9 @@ namespace ConsoleApp1
                     client.SendTextMessageAsync(e.Message.Chat.Id, "Buy RUB : " + kurss[2] + " Sale RUB : " + sale[2]);
                     break;
                 case "настройки":
-                    CreateCommand("SELECT * FROM ParentTable",connectionString);
+                    getBuy();
+                    CreateCommand();
+                    client.SendTextMessageAsync(e.Message.Chat.Id, "Buy" + Rub  +  ": " + kurss[2] + " Sale " + Rub + " : " + sale[2]);
                     break;
 
                 default:
