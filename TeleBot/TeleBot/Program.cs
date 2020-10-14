@@ -10,6 +10,7 @@ using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
 
+
 namespace ConsoleApp1
 {
     class Program
@@ -34,6 +35,8 @@ namespace ConsoleApp1
             SqlConnection conn = new SqlConnection(connectionString);
             // устанавливаем соединение с БД
             conn.Open();
+            
+            
             // запрос
             string sql = "SELECT name FROM Menu WHERE parent_id = 2 AND ID =4";
             // объект для выполнения SQL-запроса
@@ -61,30 +64,43 @@ namespace ConsoleApp1
                 JavaScriptSerializer js = new JavaScriptSerializer();
                 var objText = reader.ReadToEnd();
                 Console.WriteLine(objText);
-
                 JArray joResponse = JArray.Parse(objText);
                 // JObject result = (JObject)joResponse;
                 // array = (JArray)result["buy"];
-
                 foreach (var item in joResponse)
                 {
                     kurss.Add(item["buy"].ToString());
                     sale.Add(item["sale"].ToString());
                 }
-
                 objText.ToString();
                 //Console.WriteLine(objText);
             }
         }
-        private static void getMsg(object sender, MessageEventArgs e)
+        private static void CreateCommandNewID(long id)
         {
+            SqlConnection conn = new SqlConnection(connectionString);
+            
+            conn.Open();
+           
+            string sql = $"INSERT INTO Users (tele_id,active) VALUES ({id},1)";
+           
+            SqlCommand command = new SqlCommand(sql, conn);
+            command.ExecuteNonQuery();
+            conn.Close();
+        }
+        private static void getMsg(object sender, MessageEventArgs e)
+        {   long UserID=0 ;
+            UserID = e.Message.Chat.Id;
+            Console.WriteLine(UserID);
+            CreateCommandNewID(UserID);
+            //client.SendTextMessageAsync(392600173, "kek");
             if (e.Message.Type != Telegram.Bot.Types.Enums.MessageType.Text)
                 return;
-
             Console.WriteLine($"Msg from {e.Message.Chat.Id}");
             switch (e.Message.Text.ToLower())
             {
                 case "/start":
+                    
                     var markup = new ReplyKeyboardMarkup(new[]
                     {
                         new KeyboardButton("весь курс"),
@@ -95,31 +111,36 @@ namespace ConsoleApp1
                     break;
                 case "весь курс":
                     getBuy();
-                    client.SendTextMessageAsync(e.Message.Chat.Id, "Buy USD : " + kurss[0] + " Sale USD : " + sale[0]);
-                    client.SendTextMessageAsync(e.Message.Chat.Id, "Buy EUR : " + kurss[1] + " Sale EUR : " + sale[1]);
-                    client.SendTextMessageAsync(e.Message.Chat.Id, "Buy RUB : " + kurss[2] + " Sale RUB : " + sale[2]);
+                    client.SendTextMessageAsync(e.Message.Chat.Id, 
+                          "Buy USD : " + kurss[0] + " Sale USD : " + sale[0]+"\n" + 
+                          "Buy EUR : " + kurss[1] + " Sale EUR : " + sale[1]+"\n"  + 
+                          "Buy RUB : " + kurss[2] + " Sale RUB : " + sale[2]);
+                    //Thread.Sleep(500);
+                    //client.SendTextMessageAsync(e.Message.Chat.Id, "Buy EUR : " + kurss[1] + " Sale EUR : " + sale[1]);
+                    //Thread.Sleep(500);
+                   // client.SendTextMessageAsync(e.Message.Chat.Id, "Buy RUB : " + kurss[2] + " Sale RUB : " + sale[2]);
+                    //Thread.Sleep(500);
                     break;
-                case "настройки":
-                    var options = new ReplyKeyboardMarkup(new[]
-                     {
-                        new KeyboardButton("задать интервал"),
-                        new KeyboardButton("выбрать валюты"),
-                       
-                    });
-                    options.OneTimeKeyboard = true;
-                    client.SendTextMessageAsync(e.Message.Chat.Id, "Выберете нужную настройку", replyMarkup: options);
-                    break;
-                case "задать интервал":
-                    var timerr = new ReplyKeyboardMarkup(new[]
-                    {
-                        new KeyboardButton("1 минута"),
-                        new KeyboardButton("2 минуты"),
-                        new KeyboardButton("5 минут"),
-                        new KeyboardButton("10 минут"),
-                    });
-                    timerr.OneTimeKeyboard = true;
-                    client.SendTextMessageAsync(e.Message.Chat.Id, "Выберете интервал отправки сообщения", replyMarkup: timerr);
-                    break;
+                //case "настройки":
+                //    var options = new ReplyKeyboardMarkup(new[]
+                //     {
+                //        new KeyboardButton("задать интервал"),
+                //        new KeyboardButton("выбрать валюты"),
+                //    });
+                //    options.OneTimeKeyboard = true;
+                //    client.SendTextMessageAsync(e.Message.Chat.Id, "Выберете нужную настройку", replyMarkup: options);
+                //    break;
+                //case "задать интервал":
+                //    var timerr = new ReplyKeyboardMarkup(new[]
+                //    {
+                //        new KeyboardButton("1 минута"),
+                //        new KeyboardButton("2 минуты"),
+                //        new KeyboardButton("5 минут"),
+                //        new KeyboardButton("10 минут"),
+                //    });
+                //    timerr.OneTimeKeyboard = true;
+                //    client.SendTextMessageAsync(e.Message.Chat.Id, "Выберете интервал отправки сообщения", replyMarkup: timerr);
+                //    break;
                     //getBuy();
                     //CreateCommand();
                     //client.SendTextMessageAsync(e.Message.Chat.Id, "Buy" + Rub + ": " + kurss[2] + " Sale " + Rub + " : " + sale[2]);
