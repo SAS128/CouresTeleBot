@@ -5,12 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AdminControl"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="221.972">
     <Grid>
         <Button Content="Забанить" HorizontalAlignment="Left" Margin="29,341,0,0" VerticalAlignment="Top" Width="75"/>
         <Button Content="Разбанить" HorizontalAlignment="Left" Margin="109,341,0,0" VerticalAlignment="Top" Width="75"/>
         <Button Content="Вывести всех/обновить" HorizontalAlignment="Left" Margin="29,366,0,0" VerticalAlignment="Top" Width="155" Click="Button_Click"/>
-        <ListBox HorizontalAlignment="Left" Height="312" Margin="29,24,0,0" VerticalAlignment="Top" Width="155"/>
+        <ListBox x:Name="list" HorizontalAlignment="Left" Height="312" Margin="29,24,0,0" VerticalAlignment="Top" Width="155"/>
+        <Button Content="Выгрузить данные за все время" HorizontalAlignment="Left" Margin="19,391,0,0" VerticalAlignment="Top" Width="185" Click="Button_Click_1"/>
 
     </Grid>
 </Window>
